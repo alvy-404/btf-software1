@@ -361,7 +361,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="discountAmount">Discount Amount</label>
-                                        <input type="number" id="discountAmount" min="0" onchange="feePaymentManager.calculateTotalAmount()">
+                                        <input type="number" id="discountAmount" min="0" step="0.01" oninput="feePaymentManager.calculateTotalAmount()" onchange="feePaymentManager.calculateTotalAmount()">
                                     </div>
                                 </div>
                                 <div class="form-group">

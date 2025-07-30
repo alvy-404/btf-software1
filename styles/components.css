@@ -233,6 +233,31 @@
 .checkbox-item.partial-month input[type="checkbox"] {
     accent-color: var(--warning-color);
 }
+
+/* Discount selection styling */
+#discountSelection .checkbox-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+#discountSelection .checkbox-item:hover {
+    border-color: var(--primary-color);
+    background: var(--hover-bg);
+}
+
+#discountSelection .checkbox-item input[type="checkbox"]:checked + label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+#discountSelection .course-fee {
+    font-size: 0.9rem;
+    color: var(--success-color);
+    font-weight: 600;
+}
 /* Reports Components */
 .reports-container {
     display: grid;

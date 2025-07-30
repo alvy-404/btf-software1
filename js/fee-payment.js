@@ -260,19 +260,27 @@ class FeePaymentManager {
             return;
         }
 
-        // Display available months for discount selection
+        // Display available months for discount selection with course information
         discountSelection.innerHTML = selectedMonths.map(checkbox => {
             const monthId = checkbox.value;
-            const monthName = checkbox.closest('.checkbox-item').querySelector('label span').textContent.split(' (')[0];
+            const monthElement = checkbox.closest('.checkbox-item');
+            const labelText = monthElement.querySelector('label span').textContent;
+            const monthName = labelText.split(' (')[0];
+            const courseName = labelText.split(' (')[1]?.split(')')[0] || 'Unknown Course';
+            const monthFee = parseFloat(checkbox.dataset.amount || 0);
             
             return `
                 <div class="checkbox-item">
                     <input type="checkbox" 
                            id="discount_${monthId}" 
                            value="${monthId}" 
+                           data-amount="${monthFee}"
                            checked
                            onchange="feePaymentManager.calculateTotalAmount()">
-                    <label for="discount_${monthId}">${monthName}</label>
+                    <label for="discount_${monthId}">
+                        <span>${monthName} (${courseName})</span>
+                        <span class="course-fee">${Utils.formatCurrency(monthFee)}</span>
+                    </label>
                 </div>
             `;
         }).join('');
@@ -308,16 +316,54 @@ class FeePaymentManager {
         
         if (discountValue > 0 && discountSelection) {
             const discountApplicableMonths = Array.from(discountSelection.querySelectorAll('input[type="checkbox"]:checked'));
-            let discountableAmount = 0;
             
-            // Calculate amount eligible for discount
-            discountApplicableMonths.forEach(checkbox => {
-                const monthId = checkbox.value;
-                const monthCheckbox = monthSelection.querySelector(`input[value="${monthId}"]`);
-                if (monthCheckbox && monthCheckbox.checked) {
-                    discountableAmount += parseFloat(monthCheckbox.dataset.amount || 0);
+            if (discountApplicableMonths.length > 0) {
+                let discountableAmount = 0;
+                
+                // Calculate amount eligible for discount from selected discount months
+                discountApplicableMonths.forEach(discountCheckbox => {
+                    const monthId = discountCheckbox.value;
+                    const monthCheckbox = monthSelection.querySelector(`input[value="${monthId}"]`);
+                    if (monthCheckbox && monthCheckbox.checked) {
+                        discountableAmount += parseFloat(monthCheckbox.dataset.amount || 0);
+                    }
+                });
+                
+                if (discountType === 'percentage') {
+                    discountAmount = (discountableAmount * discountValue) / 100;
+                    // Ensure percentage doesn't exceed 100%
+                    if (discountValue > 100) {
+                        discountAmountInput.value = 100;
+                        discountAmount = discountableAmount;
+                    }
+                } else {
+                    // For fixed discount, don't exceed the discountable amount
+                    discountAmount = Math.min(discountValue, discountableAmount);
                 }
-            });
+            }
+        }
+        
+        // Ensure discount doesn't exceed total amount
+        discountAmount = Math.min(discountAmount, totalAmount);
+        
+        const discountedTotal = Math.max(0, totalAmount - discountAmount);
+        discountedAmountInput.value = discountedTotal;
+        
+        // Update the discount amount display to show actual applied discount
+        if (discountAmountInput && discountAmount !== parseFloat(discountAmountInput.value || 0)) {
+            // Only update if it's a percentage or if we're limiting a fixed amount
+            if (discountType === 'percentage' || discountAmount < parseFloat(discountAmountInput.value || 0)) {
+                // Don't update the input value for percentage as it should show the percentage
+                // For fixed amounts, show the actual applied amount if it's limited
+                if (discountType === 'fixed' && discountAmount < parseFloat(discountAmountInput.value || 0)) {
+                    // Show a warning or update display to show actual applied amount
+                    console.log(`Discount limited to ${Utils.formatCurrency(discountAmount)} (maximum applicable to selected months)`);
+                }
+            }
+        }
+        
+        this.calculateDueAmount();
+    }
             
             if (discountType === 'percentage') {
                 discountAmount = (discountableAmount * discountValue) / 100;
@@ -447,6 +493,7 @@ class FeePaymentManager {
     calculateMonthPayments(selectedMonths, totalPaidAmount, discountAmount = 0, discountApplicableMonths = []) {
         const monthPayments = [];
         let remainingAmount = totalPaidAmount;
+        let remainingDiscount = discountAmount;
         
         // Distribute the paid amount across selected months
         for (const month of selectedMonths) {
@@ -454,18 +501,29 @@ class FeePaymentManager {
             
             // Calculate discount for this month
             let monthDiscount = 0;
-            if (discountAmount > 0 && discountApplicableMonths.includes(month.monthId)) {
+            if (remainingDiscount > 0 && discountApplicableMonths.includes(month.monthId)) {
                 const discountType = document.getElementById('discountType').value;
                 if (discountType === 'percentage') {
-                    monthDiscount = (month.remainingDue * parseFloat(document.getElementById('discountAmount').value)) / 100;
+                    const discountPercentage = parseFloat(document.getElementById('discountAmount').value || 0);
+                    monthDiscount = (month.remainingDue * discountPercentage) / 100;
                 } else {
-                    // For fixed discount, distribute proportionally
-                    const totalDiscountableAmount = selectedMonths
+                    // For fixed discount, distribute proportionally among applicable months
+                    const applicableMonths = selectedMonths
                         .filter(m => discountApplicableMonths.includes(m.monthId))
                         .reduce((sum, m) => sum + m.remainingDue, 0);
-                    monthDiscount = totalDiscountableAmount > 0 ? 
-                        (month.remainingDue / totalDiscountableAmount) * discountAmount : 0;
+                    
+                    const totalDiscountableAmount = applicableMonths
+                        .reduce((sum, m) => sum + m.remainingDue, 0);
+                    
+                    if (totalDiscountableAmount > 0) {
+                        const proportionalDiscount = (month.remainingDue / totalDiscountableAmount) * discountAmount;
+                        monthDiscount = Math.min(proportionalDiscount, remainingDiscount, month.remainingDue);
+                    }
                 }
+                
+                // Ensure month discount doesn't exceed remaining discount or month due
+                monthDiscount = Math.min(monthDiscount, remainingDiscount, month.remainingDue);
+                remainingDiscount -= monthDiscount;
             }
             
             const discountedMonthDue = Math.max(0, month.remainingDue - monthDiscount);
