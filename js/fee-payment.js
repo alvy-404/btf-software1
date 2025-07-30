@@ -364,19 +364,6 @@ class FeePaymentManager {
         
         this.calculateDueAmount();
     }
-            
-            if (discountType === 'percentage') {
-                discountAmount = (discountableAmount * discountValue) / 100;
-            } else {
-                discountAmount = Math.min(discountValue, discountableAmount);
-            }
-        }
-        
-        const discountedTotal = Math.max(0, totalAmount - discountAmount);
-        discountedAmountInput.value = discountedTotal;
-        
-        this.calculateDueAmount();
-    }
 
     calculateDueAmount() {
         const discountedAmount = parseFloat(document.getElementById('discountedAmount').value || 0);
@@ -509,8 +496,7 @@ class FeePaymentManager {
                 } else {
                     // For fixed discount, distribute proportionally among applicable months
                     const applicableMonths = selectedMonths
-                        .filter(m => discountApplicableMonths.includes(m.monthId))
-                        .reduce((sum, m) => sum + m.remainingDue, 0);
+                        .filter(m => discountApplicableMonths.includes(m.monthId));
                     
                     const totalDiscountableAmount = applicableMonths
                         .reduce((sum, m) => sum + m.remainingDue, 0);
