@@ -260,29 +260,21 @@ class FeePaymentManager {
             return;
         }
 
-        // Display available months for discount selection with proper course information
-        discountSelection.innerHTML = selectedMonths.map(checkbox => {
+        // Build discount selection with proper month and course information
+        let discountHtml = '';
+        
+        selectedMonths.forEach(checkbox => {
             const monthId = checkbox.value;
-            const monthElement = checkbox.closest('.checkbox-item');
-            const labelElement = monthElement.querySelector('label');
-            
-            // Extract month and course information from the label
-            const fullText = labelElement.textContent.trim();
-            const parts = fullText.split(' (');
-            const monthName = parts[0];
-            let courseName = 'Unknown Course';
-            
-            if (parts.length > 1) {
-                const courseAndStatus = parts[1];
-                const courseMatch = courseAndStatus.match(/^([^)]+)/);
-                if (courseMatch) {
-                    courseName = courseMatch[1];
-                }
-            }
-            
             const monthFee = parseFloat(checkbox.dataset.amount || 0);
             
-            return `
+            // Find the month and course details
+            const month = window.storageManager.getMonthById(monthId);
+            const course = month ? window.storageManager.getCourseById(month.courseId) : null;
+            
+            const monthName = month ? month.name : 'Unknown Month';
+            const courseName = course ? course.name : 'Unknown Course';
+            
+            discountHtml += `
                 <div class="checkbox-item discount-option">
                     <input type="checkbox" 
                            id="discount_${monthId}" 
@@ -298,7 +290,9 @@ class FeePaymentManager {
                     </label>
                 </div>
             `;
-        }).join('');
+        });
+        
+        discountSelection.innerHTML = discountHtml;
         
         // Recalculate total after updating discount selection
         this.calculateTotalAmount();
@@ -327,7 +321,13 @@ class FeePaymentManager {
 
         totalAmountInput.value = totalAmount;
         
-        // Calculate discount based on selected discount options
+        // Calculate discount
+        this.calculateDiscount(totalAmount, discountAmountInput, discountTypeSelect, discountSelection, discountedAmountInput);
+        
+        this.calculateDueAmount();
+    }
+
+    calculateDiscount(totalAmount, discountAmountInput, discountTypeSelect, discountSelection, discountedAmountInput) {
         let actualDiscountAmount = 0;
         const discountInputValue = parseFloat(discountAmountInput?.value || 0);
         const discountType = discountTypeSelect?.value || 'fixed';
@@ -346,9 +346,8 @@ class FeePaymentManager {
                 
                 if (discountType === 'percentage') {
                     // Validate percentage (max 100%)
-                    let percentage = discountInputValue;
-                    if (percentage > 100) {
-                        percentage = 100;
+                    let percentage = Math.min(discountInputValue, 100);
+                    if (discountInputValue > 100) {
                         discountAmountInput.value = 100;
                         Utils.showToast('Percentage discount cannot exceed 100%', 'warning');
                     }
@@ -371,7 +370,30 @@ class FeePaymentManager {
         // Store the actual discount amount for later use
         this.currentActualDiscount = actualDiscountAmount;
         
-        this.calculateDueAmount();
+        // Update visual feedback for discount selection
+        this.updateDiscountVisualFeedback(discountSelection, actualDiscountAmount > 0);
+    }
+
+    updateDiscountVisualFeedback(discountSelection, hasDiscount) {
+        if (!discountSelection) return;
+        
+        const discountOptions = discountSelection.querySelectorAll('.discount-option');
+        discountOptions.forEach(option => {
+            const checkbox = option.querySelector('input[type="checkbox"]');
+            const label = option.querySelector('label');
+            
+            if (hasDiscount) {
+                if (checkbox.checked) {
+                    option.classList.add('discount-applied');
+                    option.classList.remove('discount-not-applied');
+                } else {
+                    option.classList.add('discount-not-applied');
+                    option.classList.remove('discount-applied');
+                }
+            } else {
+                option.classList.remove('discount-applied', 'discount-not-applied');
+            }
+        });
     }
 
     calculateDueAmount() {

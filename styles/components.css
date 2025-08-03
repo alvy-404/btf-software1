@@ -281,6 +281,33 @@
     color: var(--text-primary);
     transition: all 0.3s ease;
 }
+
+/* Discount applied/not applied visual feedback */
+#discountSelection .discount-option.discount-applied {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: var(--success-color);
+}
+
+#discountSelection .discount-option.discount-applied .month-course-info {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+#discountSelection .discount-option.discount-not-applied {
+    background: rgba(108, 117, 125, 0.1);
+    border-color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+#discountSelection .discount-option.discount-not-applied .month-course-info {
+    color: var(--text-secondary);
+    text-decoration: line-through;
+}
+
+#discountSelection .discount-option.discount-not-applied .course-fee {
+    color: var(--text-secondary);
+    text-decoration: line-through;
+}
 /* Reports Components */
 .reports-container {
     display: grid;
