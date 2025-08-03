@@ -166,16 +166,14 @@ class FeePaymentManager {
         
         const courseSelection = studentPaymentInfo.querySelector('#courseSelection');
         const monthSelection = studentPaymentInfo.querySelector('#monthSelection');
-        const discountSelection = studentPaymentInfo.querySelector('#discountSelection');
         
-        if (!courseSelection || !monthSelection || !discountSelection) return;
+        if (!courseSelection || !monthSelection) return;
 
         const selectedCourses = Array.from(courseSelection.querySelectorAll('input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value);
 
         if (selectedCourses.length === 0) {
             monthSelection.innerHTML = '<p>Please select courses first</p>';
-            discountSelection.innerHTML = '<p>Please select courses and months first</p>';
             this.calculateTotalAmount();
             return;
         }
@@ -241,7 +239,6 @@ class FeePaymentManager {
         }).join('');
         
         this.calculateTotalAmount();
-        this.updateDiscountSelection();
     }
 
     updateDiscountSelection() {
@@ -260,21 +257,16 @@ class FeePaymentManager {
             return;
         }
 
-        // Build discount selection with proper month and course information
-        let discountHtml = '';
-        
-        selectedMonths.forEach(checkbox => {
+        // Build discount selection HTML
+        const discountHtml = selectedMonths.map(checkbox => {
             const monthId = checkbox.value;
             const monthFee = parseFloat(checkbox.dataset.amount || 0);
-            
-            // Find the month and course details
             const month = window.storageManager.getMonthById(monthId);
             const course = month ? window.storageManager.getCourseById(month.courseId) : null;
-            
             const monthName = month ? month.name : 'Unknown Month';
             const courseName = course ? course.name : 'Unknown Course';
             
-            discountHtml += `
+            return `
                 <div class="checkbox-item discount-option">
                     <input type="checkbox" 
                            id="discount_${monthId}" 
@@ -290,12 +282,9 @@ class FeePaymentManager {
                     </label>
                 </div>
             `;
-        });
+        }).join('');
         
         discountSelection.innerHTML = discountHtml;
-        
-        // Recalculate total after updating discount selection
-        this.calculateTotalAmount();
     }
 
     calculateTotalAmount() {
@@ -305,11 +294,8 @@ class FeePaymentManager {
         const monthSelection = studentPaymentInfo.querySelector('#monthSelection');
         const totalAmountInput = document.getElementById('totalAmount');
         const discountedAmountInput = document.getElementById('discountedAmount');
-        const discountAmountInput = document.getElementById('discountAmount');
-        const discountTypeSelect = document.getElementById('discountType');
-        const discountSelection = studentPaymentInfo.querySelector('#discountSelection');
         
-        if (!monthSelection || !totalAmountInput || !discountedAmountInput) return;
+        if (!monthSelection || !totalAmountInput) return;
 
         // Only count remaining due amounts for checked months
         const selectedMonths = Array.from(monthSelection.querySelectorAll('input[type="checkbox"]:checked:not([disabled])'));
@@ -321,16 +307,31 @@ class FeePaymentManager {
 
         totalAmountInput.value = totalAmount;
         
-        // Calculate discount
-        this.calculateDiscount(totalAmount, discountAmountInput, discountTypeSelect, discountSelection, discountedAmountInput);
+        // Update discount selection after calculating total
+        this.updateDiscountSelection();
+        
+        // Calculate discount if inputs exist
+        this.calculateDiscount();
         
         this.calculateDueAmount();
     }
 
-    calculateDiscount(totalAmount, discountAmountInput, discountTypeSelect, discountSelection, discountedAmountInput) {
+    calculateDiscount() {
+        const totalAmount = parseFloat(document.getElementById('totalAmount').value || 0);
+        const discountAmountInput = document.getElementById('discountAmount');
+        const discountTypeSelect = document.getElementById('discountType');
+        const discountedAmountInput = document.getElementById('discountedAmount');
+        const studentPaymentInfo = document.getElementById('studentPaymentInfo');
+        
+        if (!discountAmountInput || !discountTypeSelect || !discountedAmountInput || !studentPaymentInfo) {
+            return;
+        }
+        
+        const discountSelection = studentPaymentInfo.querySelector('#discountSelection');
+        
         let actualDiscountAmount = 0;
-        const discountInputValue = parseFloat(discountAmountInput?.value || 0);
-        const discountType = discountTypeSelect?.value || 'fixed';
+        const discountInputValue = parseFloat(discountAmountInput.value || 0);
+        const discountType = discountTypeSelect.value || 'fixed';
         
         if (discountInputValue > 0 && discountSelection) {
             const discountApplicableMonths = Array.from(discountSelection.querySelectorAll('input[type="checkbox"]:checked'));
@@ -365,7 +366,7 @@ class FeePaymentManager {
         
         // Calculate final discounted amount
         const discountedTotal = Math.max(0, totalAmount - actualDiscountAmount);
-        discountedAmountInput.value = discountedTotal.toFixed(2);
+        discountedAmountInput.value = discountedTotal;
         
         // Store the actual discount amount for later use
         this.currentActualDiscount = actualDiscountAmount;
@@ -380,7 +381,6 @@ class FeePaymentManager {
         const discountOptions = discountSelection.querySelectorAll('.discount-option');
         discountOptions.forEach(option => {
             const checkbox = option.querySelector('input[type="checkbox"]');
-            const label = option.querySelector('label');
             
             if (hasDiscount) {
                 if (checkbox.checked) {
