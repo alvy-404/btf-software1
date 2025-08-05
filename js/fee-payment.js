@@ -161,8 +161,11 @@ class FeePaymentManager {
     }
 
     updateMonthSelection() {
-        const courseSelection = document.getElementById('courseSelection');
-        const monthSelection = document.getElementById('monthSelection');
+        const studentPaymentInfo = document.getElementById('studentPaymentInfo');
+        if (!studentPaymentInfo) return;
+        
+        const courseSelection = studentPaymentInfo.querySelector('#courseSelection');
+        const monthSelection = studentPaymentInfo.querySelector('#monthSelection');
         
         if (!courseSelection || !monthSelection) return;
 
@@ -171,11 +174,6 @@ class FeePaymentManager {
 
         if (selectedCourses.length === 0) {
             monthSelection.innerHTML = '<p>Please select courses first</p>';
-            // Clear discount selection when no courses selected
-            const discountSelection = document.getElementById('discountSelection');
-            if (discountSelection) {
-                discountSelection.innerHTML = '<p>Please select courses and months first</p>';
-            }
             this.calculateTotalAmount();
             return;
         }
@@ -244,8 +242,11 @@ class FeePaymentManager {
     }
 
     updateDiscountSelection() {
-        const monthSelection = document.getElementById('monthSelection');
-        const discountSelection = document.getElementById('discountSelection');
+        const studentPaymentInfo = document.getElementById('studentPaymentInfo');
+        if (!studentPaymentInfo) return;
+        
+        const monthSelection = studentPaymentInfo.querySelector('#monthSelection');
+        const discountSelection = studentPaymentInfo.querySelector('#discountSelection');
         
         if (!monthSelection || !discountSelection) return;
 
@@ -273,7 +274,7 @@ class FeePaymentManager {
                            data-amount="${monthFee}"
                            data-month-name="${monthName}"
                            data-course-name="${courseName}"
-                           onchange="feePaymentManager.calculateDiscount()">
+                           onchange="feePaymentManager.calculateTotalAmount()">
                     <label for="discount_${monthId}">
                         <span class="month-course-info">${monthName} (${courseName})</span>
                         <span class="course-fee">${Utils.formatCurrency(monthFee)}</span>
@@ -284,12 +285,15 @@ class FeePaymentManager {
         
         discountSelection.innerHTML = discountHtml;
         
-        // Calculate discount after populating
+        // Initialize discount calculation after populating
         this.calculateDiscount();
     }
 
     calculateTotalAmount() {
-        const monthSelection = document.getElementById('monthSelection');
+        const studentPaymentInfo = document.getElementById('studentPaymentInfo');
+        if (!studentPaymentInfo) return;
+        
+        const monthSelection = studentPaymentInfo.querySelector('#monthSelection');
         const totalAmountInput = document.getElementById('totalAmount');
         const discountedAmountInput = document.getElementById('discountedAmount');
         
@@ -303,10 +307,15 @@ class FeePaymentManager {
             totalAmount += parseFloat(checkbox.dataset.amount || 0);
         });
 
-        totalAmountInput.value = totalAmount.toFixed(2);
+        totalAmountInput.value = totalAmount;
         
         // Update discount selection after calculating total
         this.updateDiscountSelection();
+        
+        // Calculate discount if inputs exist
+        this.calculateDiscount();
+        
+        this.calculateDueAmount();
     }
 
     calculateDiscount() {
@@ -314,12 +323,13 @@ class FeePaymentManager {
         const discountAmountInput = document.getElementById('discountAmount');
         const discountTypeSelect = document.getElementById('discountType');
         const discountedAmountInput = document.getElementById('discountedAmount');
+        const studentPaymentInfo = document.getElementById('studentPaymentInfo');
         
-        if (!discountAmountInput || !discountTypeSelect || !discountedAmountInput) {
+        if (!discountAmountInput || !discountTypeSelect || !discountedAmountInput || !studentPaymentInfo) {
             return;
         }
         
-        const discountSelection = document.getElementById('discountSelection');
+        const discountSelection = studentPaymentInfo.querySelector('#discountSelection');
         
         let actualDiscountAmount = 0;
         const discountInputValue = parseFloat(discountAmountInput.value || 0);
@@ -358,7 +368,7 @@ class FeePaymentManager {
         
         // Calculate final discounted amount
         const discountedTotal = Math.max(0, totalAmount - actualDiscountAmount);
-        discountedAmountInput.value = discountedTotal.toFixed(2);
+        discountedAmountInput.value = discountedTotal;
         
         // Store the actual discount amount for later use
         this.currentActualDiscount = actualDiscountAmount;
