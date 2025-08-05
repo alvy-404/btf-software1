@@ -274,7 +274,6 @@ class FeePaymentManager {
                            data-amount="${monthFee}"
                            data-month-name="${monthName}"
                            data-course-name="${courseName}"
-                           checked
                            onchange="feePaymentManager.calculateTotalAmount()">
                     <label for="discount_${monthId}">
                         <span class="month-course-info">${monthName} (${courseName})</span>
@@ -285,6 +284,9 @@ class FeePaymentManager {
         }).join('');
         
         discountSelection.innerHTML = discountHtml;
+        
+        // Initialize discount calculation after populating
+        this.calculateDiscount();
     }
 
     calculateTotalAmount() {
@@ -373,6 +375,9 @@ class FeePaymentManager {
         
         // Update visual feedback for discount selection
         this.updateDiscountVisualFeedback(discountSelection, actualDiscountAmount > 0);
+        
+        // Update due amount after discount calculation
+        this.calculateDueAmount();
     }
 
     updateDiscountVisualFeedback(discountSelection, hasDiscount) {
@@ -382,16 +387,12 @@ class FeePaymentManager {
         discountOptions.forEach(option => {
             const checkbox = option.querySelector('input[type="checkbox"]');
             
-            if (hasDiscount) {
-                if (checkbox.checked) {
-                    option.classList.add('discount-applied');
-                    option.classList.remove('discount-not-applied');
-                } else {
-                    option.classList.add('discount-not-applied');
-                    option.classList.remove('discount-applied');
-                }
+            if (checkbox.checked) {
+                option.classList.add('discount-applied');
+                option.classList.remove('discount-not-applied');
             } else {
-                option.classList.remove('discount-applied', 'discount-not-applied');
+                option.classList.add('discount-not-applied');
+                option.classList.remove('discount-applied');
             }
         });
     }
