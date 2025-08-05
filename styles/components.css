@@ -304,23 +304,6 @@
     text-decoration: line-through;
 }
 
-/* Default state for discount options */
-#discountSelection .discount-option {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#discountSelection .discount-option input[type="checkbox"] {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary-color);
-}
-
-#discountSelection .discount-option label {
-    cursor: pointer;
-    user-select: none;
-}
 #discountSelection .discount-option.discount-not-applied .course-fee {
     color: var(--text-secondary);
     text-decoration: line-through;
