@@ -257,7 +257,7 @@ class FeePaymentManager {
             return;
         }
 
-        // Build discount selection HTML
+        // Build discount selection HTML - start with all unchecked
         const discountHtml = selectedMonths.map(checkbox => {
             const monthId = checkbox.value;
             const monthFee = parseFloat(checkbox.dataset.amount || 0);
@@ -274,17 +274,19 @@ class FeePaymentManager {
                            data-amount="${monthFee}"
                            data-month-name="${monthName}"
                            data-course-name="${courseName}"
-                           checked
-                           onchange="feePaymentManager.calculateTotalAmount()">
+                           onchange="feePaymentManager.calculateDiscount()">
                     <label for="discount_${monthId}">
                         <span class="month-course-info">${monthName} (${courseName})</span>
                         <span class="course-fee">${Utils.formatCurrency(monthFee)}</span>
                     </label>
                 </div>
             `;
-        }).join('');
+        }).filter(html => html).join('');
         
         discountSelection.innerHTML = discountHtml;
+        
+        // Reset discount calculations when discount selection changes
+        this.calculateDiscount();
     }
 
     calculateTotalAmount() {
@@ -365,7 +367,7 @@ class FeePaymentManager {
         }
         
         // Calculate final discounted amount
-        const discountedTotal = Math.max(0, totalAmount - actualDiscountAmount);
+        const discountedTotal = parseFloat((totalAmount - actualDiscountAmount).toFixed(2));
         discountedAmountInput.value = discountedTotal;
         
         // Store the actual discount amount for later use
@@ -373,6 +375,9 @@ class FeePaymentManager {
         
         // Update visual feedback for discount selection
         this.updateDiscountVisualFeedback(discountSelection, actualDiscountAmount > 0);
+        
+        // Update due amount calculation
+        this.calculateDueAmount();
     }
 
     updateDiscountVisualFeedback(discountSelection, hasDiscount) {

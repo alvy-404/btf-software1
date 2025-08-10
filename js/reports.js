@@ -166,9 +166,26 @@ class ReportsManager {
     }
 
     filterByCourse(payments, courseId) {
-        return payments.filter(payment => 
-            payment.courses.includes(courseId)
-        );
+        return payments.filter(payment => {
+            // Check if payment includes the specific course
+            if (payment.courses.includes(courseId)) {
+                // For course-specific filtering, only include payments that have months from this course
+                if (payment.monthPayments) {
+                    // Check if any month payment is for this course
+                    return payment.monthPayments.some(mp => {
+                        const month = window.storageManager.getMonthById(mp.monthId);
+                        return month && month.courseId === courseId;
+                    });
+                } else {
+                    // Legacy payment structure - check if any month belongs to this course
+                    return payment.months.some(monthId => {
+                        const month = window.storageManager.getMonthById(monthId);
+                        return month && month.courseId === courseId;
+                    });
+                }
+            }
+            return false;
+        });
     }
 
     filterBySpecificMonth(payments, monthId) {
@@ -384,12 +401,8 @@ class ReportsManager {
                 const coursePayments = payment.monthPayments.filter(mp => courseMonthIds.includes(mp.monthId));
                 displayAmount = coursePayments.reduce((sum, mp) => sum + mp.paidAmount, 0);
                 
-                courseNames = payment.courses.map(courseId => {
-                    if (courseId === reportCourse) {
-                        const course = window.storageManager.getCourseById(courseId);
-                        return course?.name || 'Unknown';
-                    }
-                }).filter(Boolean).join(', ');
+                const course = window.storageManager.getCourseById(reportCourse);
+                courseNames = course?.name || 'Unknown';
                 
                 monthNames = coursePayments.map(mp => {
                     const month = window.storageManager.getMonthById(mp.monthId);
@@ -397,15 +410,27 @@ class ReportsManager {
                 }).join(', ');
             } else {
                 // Legacy handling
-                courseNames = payment.courses.map(courseId => {
-                    const course = window.storageManager.getCourseById(courseId);
-                    return course?.name || 'Unknown';
-                }).join(', ');
+                const course = window.storageManager.getCourseById(reportCourse);
+                courseNames = course?.name || 'Unknown';
                 
-                monthNames = payment.months.map(monthId => {
+                // Only show months that belong to the selected course
+                monthNames = payment.months.filter(monthId => {
+                    const month = window.storageManager.getMonthById(monthId);
+                    return month && month.courseId === reportCourse;
+                }).map(monthId => {
                     const month = window.storageManager.getMonthById(monthId);
                     return month?.name || 'Unknown';
                 }).join(', ');
+                
+                // Calculate proportional amount for this course
+                const totalCourseMonths = payment.months.filter(monthId => {
+                    const month = window.storageManager.getMonthById(monthId);
+                    return month && month.courseId === reportCourse;
+                }).length;
+                
+                if (totalCourseMonths > 0) {
+                    displayAmount = (payment.paidAmount / payment.months.length) * totalCourseMonths;
+                }
             }
         } else {
             // Default: show all courses and months
@@ -427,6 +452,9 @@ class ReportsManager {
             }
         }
 
+        // Check if this payment has discount
+        const hasDiscount = payment.discountAmount && payment.discountAmount > 0;
+        const discountTag = hasDiscount ? '<span class="discount-tag">Discounted</span>' : '';
         return `
             <div class="payment-item">
                 <div class="detail-item">
@@ -653,7 +681,7 @@ class ReportsManager {
             <div class="payment-item">
                 <div class="detail-item">
                     <div class="detail-label">Invoice</div>
-                    <div class="detail-value">${payment.invoiceNumber}</div>
+                    <div class="detail-value">${payment.invoiceNumber} ${discountTag}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Student</div>
@@ -667,6 +695,16 @@ class ReportsManager {
                     <div class="detail-label">Months</div>
                     <div class="detail-value">${monthNames}</div>
                 </div>
+                ${hasDiscount ? `
+                <div class="detail-item">
+                    <div class="detail-label">Original Amount</div>
+                    <div class="detail-value">${Utils.formatCurrency(payment.totalAmount)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Discount</div>
+                    <div class="detail-value">-${Utils.formatCurrency(payment.discountAmount)}</div>
+                </div>
+                ` : ''}
                 <div class="detail-item">
                     <div class="detail-label">Original Amount</div>
                     <div class="detail-value">${Utils.formatCurrency(payment.totalAmount)}</div>
