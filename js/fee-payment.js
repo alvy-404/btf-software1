@@ -219,16 +219,17 @@ class FeePaymentManager {
                            value="${month.id}" 
                            data-amount="${remainingDue}" 
                            data-total-fee="${month.payment}"
-                           data-paid-amount="${totalPaid}"
+                           data-paid-amount="${monthPayment ? monthPayment.totalPaid : 0}"
+                           data-discount-amount="${monthPayment ? monthPayment.totalDiscount : 0}"
                            ${isFullyPaid ? 'checked disabled' : ''} 
                            onchange="feePaymentManager.calculateTotalAmount()">
                     <label for="month_${month.id}">
-                        <span>${month.name} (${month.courseName}) ${isFullyPaid ? '✓ Fully Paid' : (totalPaid > 0 ? '⚠ Partial' : '')}</span>
+                        <span>${month.name} (${month.courseName}) ${isFullyPaid ? '✓ Fully Paid' : (monthPayment && (monthPayment.totalPaid > 0 || monthPayment.totalDiscount > 0) ? '⚠ Partial' : '')}</span>
                         <span class="course-fee">
                             ${isFullyPaid ? 
                                 Utils.formatCurrency(month.payment) : 
-                                (totalPaid > 0 ? 
-                                    `${Utils.formatCurrency(remainingDue)} due (${Utils.formatCurrency(totalPaid)} paid)` : 
+                                (monthPayment && (monthPayment.totalPaid > 0 || monthPayment.totalDiscount > 0) ? 
+                                    `${Utils.formatCurrency(Math.max(0, month.payment - monthPayment.totalPaid - monthPayment.totalDiscount))} due (${Utils.formatCurrency(monthPayment.totalPaid)} paid${monthPayment.totalDiscount > 0 ? `, ${Utils.formatCurrency(monthPayment.totalDiscount)} discount` : ''})` : 
                                     Utils.formatCurrency(month.payment)
                                 )
                             }
@@ -524,7 +525,8 @@ class FeePaymentManager {
             const discountType = document.getElementById('discountType').value;
             
             if (discountType === 'percentage') {
-                const discountPercentage = parseFloat(document.getElementById('discountAmount').value || 0);
+                                    const totalPaidWithDiscount = monthPayment.totalPaid + monthPayment.totalDiscount;
+                                    const remainingDue = Math.max(0, month.payment - totalPaidWithDiscount);
                 discountApplicableMonths.forEach(monthId => {
                     const month = selectedMonths.find(m => m.monthId === monthId);
                     if (month) {
@@ -555,7 +557,7 @@ class FeePaymentManager {
             // Get discount for this month
             const monthDiscount = discountDistribution[month.monthId] || 0;
             
-            const discountedMonthDue = Math.max(0, month.remainingDue - monthDiscount);
+                           data-amount="${Math.max(0, month.payment - (monthPayment ? monthPayment.totalPaid + monthPayment.totalDiscount : 0))}" 
             const amountForThisMonth = Math.min(remainingAmount, discountedMonthDue);
             
             monthPayments.push({

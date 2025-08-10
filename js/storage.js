@@ -364,9 +364,28 @@ class StorageManager {
                                 payments: []
                             };
                         }
-                        // For legacy payments, assume full month payment
-                        const amountPaid = payment.paidAmount / payment.months.length;
-                        const discountAmount = (payment.discountAmount || 0) / payment.months.length;
+                        // For legacy payments, distribute proportionally
+                        const totalMonths = payment.months.length;
+                        const amountPaid = payment.paidAmount / totalMonths;
+                        
+                        // Calculate discount for this specific month
+                        let discountAmount = 0;
+                        if (payment.discountAmount > 0 && payment.discountApplicableMonths) {
+                            if (payment.discountApplicableMonths.includes(monthId)) {
+                                const applicableMonthsCount = payment.discountApplicableMonths.length;
+                                if (payment.discountType === 'percentage') {
+                                    const discountPercentage = parseFloat(payment.discountAmount || 0);
+                                    discountAmount = (month.payment * discountPercentage) / 100;
+                                } else {
+                                    // Fixed amount distributed proportionally
+                                    discountAmount = payment.discountAmount / applicableMonthsCount;
+                                }
+                            }
+                        } else if (payment.discountAmount > 0) {
+                            // Legacy: distribute discount equally across all months
+                            discountAmount = payment.discountAmount / totalMonths;
+                        }
+                        
                         monthPayments[monthId].totalPaid += amountPaid;
                         monthPayments[monthId].totalDiscount += discountAmount;
                         monthPayments[monthId].payments.push({

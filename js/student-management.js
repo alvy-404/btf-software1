@@ -474,8 +474,10 @@ class StudentManagementManager {
                                         unpaidDue += month.payment;
                                     } else {
                                         // Check if there's remaining due
-                                        const remainingDue = Math.max(0, month.payment - monthPayment.totalPaid);
-                                        unpaidDue += remainingDue;
+                                        const totalPaidWithDiscount = monthPayment.totalPaid + monthPayment.totalDiscount;
+                                        const remainingDue = Math.max(0, month.payment - totalPaidWithDiscount);
+                                        const totalPaidWithDiscount = monthPayment.totalPaid + monthPayment.totalDiscount;
+                                        const remainingDue = Math.max(0, month.payment - totalPaidWithDiscount);
                                     }
                                 });
                             }
