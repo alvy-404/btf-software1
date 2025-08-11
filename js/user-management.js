@@ -14,10 +14,15 @@ class UserManagementManager {
     bindEvents() {
         const addUserForm = document.getElementById('addUserForm');
         if (addUserForm) {
-            addUserForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            addUserForm.removeEventListener('submit', this.handleUserSubmit);
+            this.handleUserSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.addUser();
-            });
+                return false;
+            };
+            addUserForm.addEventListener('submit', this.handleUserSubmit);
         }
     }
 

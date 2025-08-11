@@ -16,19 +16,29 @@ class StudentManagementManager {
         // Create Institution Form
         const institutionForm = document.getElementById('createInstitutionForm');
         if (institutionForm) {
-            institutionForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            institutionForm.removeEventListener('submit', this.handleInstitutionSubmit);
+            this.handleInstitutionSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.createInstitution();
-            });
+                return false;
+            };
+            institutionForm.addEventListener('submit', this.handleInstitutionSubmit);
         }
 
         // Add Student Form
         const studentForm = document.getElementById('addStudentForm');
         if (studentForm) {
-            studentForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            studentForm.removeEventListener('submit', this.handleStudentSubmit);
+            this.handleStudentSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.addStudent();
-            });
+                return false;
+            };
+            studentForm.addEventListener('submit', this.handleStudentSubmit);
         }
 
         // Search and filter events

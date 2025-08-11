@@ -108,12 +108,12 @@
                     <!-- Create Batch -->
                     <div class="management-card">
                         <h3>Create Batch</h3>
-                        <form id="createBatchForm">
+                        <form id="createBatchForm" onsubmit="return false;">
                             <div class="form-group">
                                 <label for="batchName">Batch Name</label>
                                 <input type="text" id="batchName" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Create Batch</button>
+                            <button type="button" class="btn btn-primary" onclick="batchManager.createBatch()">Create Batch</button>
                         </form>
                         <div class="entity-list">
                             <h4>Existing Batches</h4>
@@ -124,7 +124,7 @@
                     <!-- Create Course -->
                     <div class="management-card">
                         <h3>Create Course</h3>
-                        <form id="createCourseForm">
+                        <form id="createCourseForm" onsubmit="return false;">
                             <div class="form-group">
                                 <label for="courseName">Course Name</label>
                                 <input type="text" id="courseName" required>
@@ -135,7 +135,7 @@
                                     <option value="">Select Batch</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary">Create Course</button>
+                            <button type="button" class="btn btn-primary" onclick="batchManager.createCourse()">Create Course</button>
                         </form>
                         <div class="entity-list">
                             <h4>Existing Courses</h4>
@@ -146,7 +146,7 @@
                     <!-- Create Month -->
                     <div class="management-card">
                         <h3>Create Month</h3>
-                        <form id="createMonthForm">
+                        <form id="createMonthForm" onsubmit="return false;">
                             <div class="form-group">
                                 <label for="monthName">Month Name</label>
                                 <select id="monthName" required>
@@ -193,7 +193,7 @@
                                 <label for="coursePayment">Course Payment (৳)</label>
                                 <input type="number" id="coursePayment" required min="0">
                             </div>
-                            <button type="submit" class="btn btn-primary">Create Month</button>
+                            <button type="button" class="btn btn-primary" onclick="batchManager.createMonth()">Create Month</button>
                         </form>
                         <div class="entity-list">
                             <h4>Existing Months</h4>
@@ -212,7 +212,7 @@
                     <!-- Create Institution -->
                     <div class="management-card">
                         <h3>Create Institution</h3>
-                        <form id="createInstitutionForm">
+                        <form id="createInstitutionForm" onsubmit="return false;">
                             <div class="form-group">
                                 <label for="institutionName">Institution Name</label>
                                 <input type="text" id="institutionName" required>
@@ -221,7 +221,7 @@
                                 <label for="institutionAddress">Institution Address</label>
                                 <textarea id="institutionAddress" required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Create Institution</button>
+                            <button type="button" class="btn btn-primary" onclick="studentManager.createInstitution()">Create Institution</button>
                         </form>
                         <div class="entity-list">
                             <h4>Existing Institutions</h4>
@@ -232,7 +232,7 @@
                     <!-- Add Student -->
                     <div class="management-card full-width">
                         <h3>Add Student</h3>
-                        <form id="addStudentForm">
+                        <form id="addStudentForm" onsubmit="return false;">
                             <div class="form-section-header">Personal Information</div>
                             <div class="form-row">
                                 <div class="form-group">
@@ -285,7 +285,7 @@
                                     <p>Please select a batch first</p>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add Student</button>
+                            <button type="button" class="btn btn-primary" onclick="studentManager.addStudent()">Add Student</button>
                         </form>
                     </div>
                 </div>
@@ -315,12 +315,12 @@
                 <div class="fee-payment-container">
                     <div class="student-search-card">
                         <h3>Find Student</h3>
-                        <form id="findStudentForm">
+                        <form id="findStudentForm" onsubmit="return false;">
                             <div class="form-group">
                                 <label for="searchStudentId">Search Student</label>
                                 <input type="text" id="searchStudentId" placeholder="Enter Student ID or Student Name" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Find Student</button>
+                            <button type="button" class="btn btn-primary" onclick="feePaymentManager.findStudent()">Find Student</button>
                         </form>
                     </div>
 
@@ -332,7 +332,7 @@
 
                         <div class="payment-form-card">
                             <h3>Fee Payment</h3>
-                            <form id="feePaymentForm">
+                            <form id="feePaymentForm" onsubmit="return false;">
                                 <div class="form-group">
                                     <label>Select Courses</label>
                                     <div id="courseSelection" class="checkbox-group"></div>
@@ -388,7 +388,7 @@
                                         <input type="text" id="receivedBy" required>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Process Payment</button>
+                                <button type="button" class="btn btn-primary" onclick="feePaymentManager.processPayment()">Process Payment</button>
                             </form>
                         </div>
                     </div>
@@ -473,7 +473,7 @@
                 <div class="user-management-container">
                     <div class="add-user-card">
                         <h3>Add New User</h3>
-                        <form id="addUserForm">
+                        <form id="addUserForm" onsubmit="return false;">
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="newUsername">Username</label>
@@ -493,7 +493,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add User</button>
+                            <button type="button" class="btn btn-primary" onclick="userManagementManager.addUser()">Add User</button>
                         </form>
                     </div>
                     <div class="users-list-card">

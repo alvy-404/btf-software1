@@ -16,28 +16,43 @@ class BatchManager {
         // Create Batch Form
         const createBatchForm = document.getElementById('createBatchForm');
         if (createBatchForm) {
-            createBatchForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            createBatchForm.removeEventListener('submit', this.handleBatchSubmit);
+            this.handleBatchSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.createBatch();
-            });
+                return false;
+            };
+            createBatchForm.addEventListener('submit', this.handleBatchSubmit);
         }
 
         // Create Course Form
         const createCourseForm = document.getElementById('createCourseForm');
         if (createCourseForm) {
-            createCourseForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            createCourseForm.removeEventListener('submit', this.handleCourseSubmit);
+            this.handleCourseSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.createCourse();
-            });
+                return false;
+            };
+            createCourseForm.addEventListener('submit', this.handleCourseSubmit);
         }
 
         // Create Month Form
         const createMonthForm = document.getElementById('createMonthForm');
         if (createMonthForm) {
-            createMonthForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            createMonthForm.removeEventListener('submit', this.handleMonthSubmit);
+            this.handleMonthSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.createMonth();
-            });
+                return false;
+            };
+            createMonthForm.addEventListener('submit', this.handleMonthSubmit);
         }
     }
 

@@ -16,17 +16,27 @@ class FeePaymentManager {
         const paymentForm = document.getElementById('feePaymentForm');
         
         if (searchForm) {
-            searchForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            searchForm.removeEventListener('submit', this.handleSearchSubmit);
+            this.handleSearchSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.findStudent();
-            });
+                return false;
+            };
+            searchForm.addEventListener('submit', this.handleSearchSubmit);
         }
 
         if (paymentForm) {
-            paymentForm.addEventListener('submit', (e) => {
+            // Remove any existing event listeners
+            paymentForm.removeEventListener('submit', this.handlePaymentSubmit);
+            this.handlePaymentSubmit = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.processPayment();
-            });
+                return false;
+            };
+            paymentForm.addEventListener('submit', this.handlePaymentSubmit);
         }
 
         // Bind paid amount change
