@@ -1,10 +1,13 @@
 // Batch Management
 class BatchManager {
     constructor() {
+        this.isInitialized = false;
         this.init();
     }
 
     init() {
+        if (this.isInitialized) return;
+        this.isInitialized = true;
         this.bindEvents();
         this.refresh();
     }
@@ -223,63 +226,138 @@ class BatchManager {
         const batch = window.storageManager.getBatchById(id);
         if (!batch) return;
 
-        const newName = prompt('Edit batch name:', batch.name);
-        if (newName && newName !== batch.name) {
-            const sanitizedName = Utils.sanitizeInput(newName);
-            
-            // Check if new name already exists
-            const existingBatch = window.storageManager.getBatches().find(b => 
-                b.name.toLowerCase() === sanitizedName.toLowerCase() && b.id !== id
-            );
+        const editForm = `
+            <form id="editBatchForm">
+                <div class="form-group">
+                    <label for="editBatchName">Batch Name</label>
+                    <input type="text" id="editBatchName" value="${batch.name}" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Update Batch</button>
+                    <button type="button" class="btn btn-outline" onclick="navigationManager.closeModal(document.getElementById('editModal'))">Cancel</button>
+                </div>
+            </form>
+        `;
 
-            if (existingBatch) {
-                Utils.showToast('Batch with this name already exists', 'error');
+        window.navigationManager.showModal('editModal', 'Edit Batch', editForm);
+
+        document.getElementById('editBatchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('editBatchName').value.trim();
+            
+            if (!newName) {
+                Utils.showToast('Please enter batch name', 'error');
                 return;
             }
 
-            window.storageManager.updateBatch(id, { name: sanitizedName });
-            Utils.showToast('Batch updated successfully', 'success');
-            this.refresh();
-        }
+            if (newName !== batch.name) {
+                const sanitizedName = Utils.sanitizeInput(newName);
+                
+                // Check if new name already exists
+                const existingBatch = window.storageManager.getBatches().find(b => 
+                    b.name.toLowerCase() === sanitizedName.toLowerCase() && b.id !== id
+                );
+
+                if (existingBatch) {
+                    Utils.showToast('Batch with this name already exists', 'error');
+                    return;
+                }
+
+                window.storageManager.updateBatch(id, { name: sanitizedName });
+                Utils.showToast('Batch updated successfully', 'success');
+                window.navigationManager.closeModal(document.getElementById('editModal'));
+                this.refresh();
+            }
+        });
     }
 
     editCourse(id) {
         const course = window.storageManager.getCourseById(id);
         if (!course) return;
 
-        const newName = prompt('Edit course name:', course.name);
-        if (newName && newName !== course.name) {
-            const sanitizedName = Utils.sanitizeInput(newName);
-            
-            // Check if new name already exists in the same batch
-            const existingCourse = window.storageManager.getCourses().find(c => 
-                c.name.toLowerCase() === sanitizedName.toLowerCase() && 
-                c.batchId === course.batchId && 
-                c.id !== id
-            );
+        const editForm = `
+            <form id="editCourseForm">
+                <div class="form-group">
+                    <label for="editCourseName">Course Name</label>
+                    <input type="text" id="editCourseName" value="${course.name}" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Update Course</button>
+                    <button type="button" class="btn btn-outline" onclick="navigationManager.closeModal(document.getElementById('editModal'))">Cancel</button>
+                </div>
+            </form>
+        `;
 
-            if (existingCourse) {
-                Utils.showToast('Course with this name already exists in this batch', 'error');
+        window.navigationManager.showModal('editModal', 'Edit Course', editForm);
+
+        document.getElementById('editCourseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('editCourseName').value.trim();
+            
+            if (!newName) {
+                Utils.showToast('Please enter course name', 'error');
                 return;
             }
 
-            window.storageManager.updateCourse(id, { name: sanitizedName });
-            Utils.showToast('Course updated successfully', 'success');
-            this.refresh();
-        }
+            if (newName !== course.name) {
+                const sanitizedName = Utils.sanitizeInput(newName);
+                
+                // Check if new name already exists in the same batch
+                const existingCourse = window.storageManager.getCourses().find(c => 
+                    c.name.toLowerCase() === sanitizedName.toLowerCase() && 
+                    c.batchId === course.batchId && 
+                    c.id !== id
+                );
+
+                if (existingCourse) {
+                    Utils.showToast('Course with this name already exists in this batch', 'error');
+                    return;
+                }
+
+                window.storageManager.updateCourse(id, { name: sanitizedName });
+                Utils.showToast('Course updated successfully', 'success');
+                window.navigationManager.closeModal(document.getElementById('editModal'));
+                this.refresh();
+            }
+        });
     }
 
     editMonth(id) {
         const month = window.storageManager.getMonthById(id);
         if (!month) return;
 
-        const newName = prompt('Edit month name:', month.name);
-        const newPayment = prompt('Edit payment amount:', month.payment);
+        const editForm = `
+            <form id="editMonthForm">
+                <div class="form-group">
+                    <label for="editMonthName">Month Name</label>
+                    <input type="text" id="editMonthName" value="${month.name}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editMonthPayment">Payment Amount (৳)</label>
+                    <input type="number" id="editMonthPayment" value="${month.payment}" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Update Month</button>
+                    <button type="button" class="btn btn-outline" onclick="navigationManager.closeModal(document.getElementById('editModal'))">Cancel</button>
+                </div>
+            </form>
+        `;
 
-        if (newName || newPayment) {
+        window.navigationManager.showModal('editModal', 'Edit Month', editForm);
+
+        document.getElementById('editMonthForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('editMonthName').value.trim();
+            const newPayment = parseFloat(document.getElementById('editMonthPayment').value);
+            
+            if (!newName || !newPayment || newPayment <= 0) {
+                Utils.showToast('Please fill all fields with valid values', 'error');
+                return;
+            }
+
             const updates = {};
             
-            if (newName && newName !== month.name) {
+            if (newName !== month.name) {
                 const sanitizedName = Utils.sanitizeInput(newName);
                 
                 // Check if new name already exists for the same course
@@ -297,16 +375,17 @@ class BatchManager {
                 updates.name = sanitizedName;
             }
 
-            if (newPayment && parseFloat(newPayment) > 0 && parseFloat(newPayment) !== month.payment) {
-                updates.payment = parseFloat(newPayment);
+            if (newPayment !== month.payment) {
+                updates.payment = newPayment;
             }
 
             if (Object.keys(updates).length > 0) {
                 window.storageManager.updateMonth(id, updates);
                 Utils.showToast('Month updated successfully', 'success');
+                window.navigationManager.closeModal(document.getElementById('editModal'));
                 this.refresh();
             }
-        }
+        });
     }
 
     deleteBatch(id) {

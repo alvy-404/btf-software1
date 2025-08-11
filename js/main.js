@@ -158,4 +158,9 @@ window.logout = function() {
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
+    
+    // Initialize managers
+    if (!window.batchManager) {
+        window.batchManager = new BatchManager();
+    }
 });

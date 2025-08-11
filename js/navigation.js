@@ -84,7 +84,12 @@ class NavigationManager {
                 window.dashboardManager?.refresh();
                 break;
             case 'manage-batch':
-                window.batchManager?.refresh();
+                if (window.batchManager) {
+                    window.batchManager.refresh();
+                } else {
+                    // Initialize batch manager if not already done
+                    window.batchManager = new BatchManager();
+                }
                 break;
             case 'manage-students':
                 if (window.studentManager) {
