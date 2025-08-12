@@ -13,6 +13,32 @@ class StudentManagementManager {
     }
 
     bindEvents() {
+        // Create Institution Button
+        const createInstitutionBtn = document.getElementById('createInstitutionBtn');
+        if (createInstitutionBtn) {
+            createInstitutionBtn.removeEventListener('click', this.handleCreateInstitution);
+            this.handleCreateInstitution = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.createInstitution();
+                return false;
+            };
+            createInstitutionBtn.addEventListener('click', this.handleCreateInstitution);
+        }
+
+        // Add Student Button
+        const addStudentBtn = document.getElementById('addStudentBtn');
+        if (addStudentBtn) {
+            addStudentBtn.removeEventListener('click', this.handleAddStudent);
+            this.handleAddStudent = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.addStudent();
+                return false;
+            };
+            addStudentBtn.addEventListener('click', this.handleAddStudent);
+        }
+
         // Create Institution Form
         const institutionForm = document.getElementById('createInstitutionForm');
         if (institutionForm) {
