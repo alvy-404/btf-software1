@@ -163,7 +163,4 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!window.batchManager) {
         window.batchManager = new BatchManager();
     }
-    if (!window.studentManager) {
-        window.studentManager = new StudentManagementManager();
-    }
 });
