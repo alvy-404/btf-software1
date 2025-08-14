@@ -13,59 +13,33 @@ class StudentManagementManager {
     }
 
     bindEvents() {
-        // Create Institution Button
-        const createInstitutionBtn = document.getElementById('createInstitutionBtn');
-        if (createInstitutionBtn) {
-            createInstitutionBtn.removeEventListener('click', this.handleCreateInstitution);
-            this.handleCreateInstitution = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.createInstitution();
-                return false;
-            };
-            createInstitutionBtn.addEventListener('click', this.handleCreateInstitution);
-        }
-
-        // Add Student Button
-        const addStudentBtn = document.getElementById('addStudentBtn');
-        if (addStudentBtn) {
-            addStudentBtn.removeEventListener('click', this.handleAddStudent);
-            this.handleAddStudent = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.addStudent();
-                return false;
-            };
-            addStudentBtn.addEventListener('click', this.handleAddStudent);
-        }
-
         // Create Institution Form
         const institutionForm = document.getElementById('createInstitutionForm');
         if (institutionForm) {
-            // Remove any existing event listeners
-            institutionForm.removeEventListener('submit', this.handleInstitutionSubmit);
-            this.handleInstitutionSubmit = (e) => {
+            institutionForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.createInstitution();
                 return false;
-            };
-            institutionForm.addEventListener('submit', this.handleInstitutionSubmit);
+            });
         }
 
         // Add Student Form
         const studentForm = document.getElementById('addStudentForm');
         if (studentForm) {
-            // Remove any existing event listeners
-            studentForm.removeEventListener('submit', this.handleStudentSubmit);
-            this.handleStudentSubmit = (e) => {
+            studentForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.addStudent();
                 return false;
-            };
-            studentForm.addEventListener('submit', this.handleStudentSubmit);
+            });
         }
+
+        // Create Institution Button (using onclick from form button)
+        // This will be handled by the form submission above
+
+        // Add Student Button (using onclick from form button)  
+        // This will be handled by the form submission above
 
         // Search and filter events
         const studentSearch = document.getElementById('studentSearch');

@@ -159,8 +159,5 @@ window.logout = function() {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
     
-    // Initialize managers
-    if (!window.batchManager) {
-        window.batchManager = new BatchManager();
-    }
+    // Managers will be initialized when their respective pages are accessed
 });

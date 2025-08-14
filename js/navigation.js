@@ -92,7 +92,9 @@ class NavigationManager {
                 }
                 break;
             case 'manage-students':
-                if (window.studentManager) {
+                if (!window.studentManager) {
+                    window.studentManager = new StudentManagementManager();
+                } else {
                     window.studentManager.refresh();
                 }
                 break;
