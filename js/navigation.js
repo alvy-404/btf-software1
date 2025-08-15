@@ -93,8 +93,14 @@ class NavigationManager {
                 break;
             case 'manage-students':
                 if (!window.studentManager) {
-                    window.studentManager = new StudentManagementManager();
+                    window.studentManagementManager = new StudentManagementManager();
+                    window.studentManagementManager.init();
+                    // Keep backward compatibility
+                    window.studentManager = window.studentManagementManager;
                 } else {
+                    if (!window.studentManager.isInitialized) {
+                        window.studentManager.init();
+                    }
                     window.studentManager.refresh();
                 }
                 break;

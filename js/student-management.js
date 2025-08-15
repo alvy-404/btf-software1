@@ -2,7 +2,6 @@
 class StudentManagementManager {
     constructor() {
         this.isInitialized = false;
-        this.init();
     }
 
     init() {
@@ -16,6 +15,34 @@ class StudentManagementManager {
         // Create Institution Form
         const institutionForm = document.getElementById('createInstitutionForm');
         if (institutionForm) {
+            // Remove any existing event listeners
+            institutionForm.removeEventListener('submit', this.handleInstitutionSubmit);
+            this.handleInstitutionSubmit = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.createInstitution();
+                return false;
+            };
+            institutionForm.addEventListener('submit', this.handleInstitutionSubmit);
+        }
+
+        // Add Student Form
+        const studentForm = document.getElementById('addStudentForm');
+        if (studentForm) {
+            // Remove any existing event listeners
+            studentForm.removeEventListener('submit', this.handleStudentSubmit);
+            this.handleStudentSubmit = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.addStudent();
+                return false;
+            };
+            studentForm.addEventListener('submit', this.handleStudentSubmit);
+        }
+
+        // Bind button click events as backup
+        const createInstitutionBtn = document.querySelector('#createInstitutionForm button[type="button"]');
+        if (createInstitutionBtn) {
             institutionForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -24,9 +51,8 @@ class StudentManagementManager {
             });
         }
 
-        // Add Student Form
-        const studentForm = document.getElementById('addStudentForm');
-        if (studentForm) {
+        const addStudentBtn = document.querySelector('#addStudentForm button[type="button"]');
+        if (addStudentBtn) {
             studentForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -34,12 +60,6 @@ class StudentManagementManager {
                 return false;
             });
         }
-
-        // Create Institution Button (using onclick from form button)
-        // This will be handled by the form submission above
-
-        // Add Student Button (using onclick from form button)  
-        // This will be handled by the form submission above
 
         // Search and filter events
         const studentSearch = document.getElementById('studentSearch');
